@@ -617,44 +617,45 @@
             }
 
             async executePurchase() {
-                if (!this.currentPurchase || !this.isConnected) return;
+    if (!this.currentPurchase || !this.isConnected) return;
 
-                const spinner = document.getElementById('purchaseSpinner');
-                const button = document.getElementById('confirmPurchaseBtn');
-                
-                spinner.style.display = 'inline-block';
-                button.disabled = true;
+    const spinner = document.getElementById('purchaseSpinner');
+    const button = document.getElementById('confirmPurchaseBtn');
+    
+    spinner.style.display = 'inline-block';
+    button.disabled = true;
 
-                try {
-                    // Create transaction for the booster purchase
-                    const transaction = {
-                        validUntil: Math.floor(Date.now() / 1000) + 300,
-                        messages: [{
-                            address: 'EQD1Lp1KcmGHFpE8eIvL1mnHT83b4HdgHxDdFym1wjNbkP7R', // Game treasury address
-                            amount: (this.currentPurchase.price * 1000000000).toString(),
-                            payload: btoa(`booster:${this.currentPurchase.id}`)
-                        }]
-                    };
+    try {
+        // Create transaction for the booster purchase
+        const transaction = {
+            validUntil: Math.floor(Date.now() / 1000) + 300,
+            messages: [{
+                address: 'EQD1Lp1KcmGHFpE8eIvL1mnHT83b4HdgHxDdFym1wjNbkP7R', // Game treasury address
+                amount: (this.currentPurchase.price * 1000000000).toString(),
+                // Use a properly formatted comment instead of btoa encoding
+                payload: `booster:${this.currentPurchase.id}`
+            }]
+        };
 
-                    await this.tonConnectUI.sendTransaction(transaction);
-                    
-                    // Activate booster
-                    this.activateBooster(this.currentPurchase);
-                    
-                    this.showStatus(`${this.currentPurchase.name} purchased and activated!`, 'success');
-                    
-                    // Update balance
-                    setTimeout(() => this.updateBalance(), 2000);
-                    
-                    bootstrap.Modal.getInstance(document.getElementById('purchaseModal')).hide();
-                    
-                } catch (error) {
-                    this.showStatus('Purchase failed: ' + error.message, 'error');
-                } finally {
-                    spinner.style.display = 'none';
-                    button.disabled = false;
-                }
-            }
+        await this.tonConnectUI.sendTransaction(transaction);
+        
+        // Activate booster
+        this.activateBooster(this.currentPurchase);
+        
+        this.showStatus(`${this.currentPurchase.name} purchased and activated!`, 'success');
+        
+        // Update balance
+        setTimeout(() => this.updateBalance(), 2000);
+        
+        bootstrap.Modal.getInstance(document.getElementById('purchaseModal')).hide();
+        
+    } catch (error) {
+        this.showStatus('Purchase failed: ' + error.message, 'error');
+    } finally {
+        spinner.style.display = 'none';
+        button.disabled = false;
+    }
+}
 
             activateBooster(booster) {
                 if (booster.id === 'extra_life') {
